@@ -1,11 +1,10 @@
 var CONFFILE = "./config.js";
-
 var http = require("http"),
-  fs = require("fs"),
-  conf = require(CONFFILE),
-  urlParse = require("url").parse,
-  path = require("path"),
-  Mock = require("mockjs");
+    fs = require("fs"),
+    conf = require(CONFFILE),
+    urlParse = require("url").parse,
+    path = require("path"),
+    Mock = require("mockjs");
 
 var Main = {
   start: function() {
@@ -16,8 +15,8 @@ var Main = {
   update: function() {
     var self = this;
     this.server = null;
-    this.server = http.createServer(function(request, response) {
-      self.bindBlankForRes(response);
+    this.server = http.createServer(function(request, res) {
+      self.bindBlankForRes(res);
       var pathname = urlParse(request.url).pathname;
       if (pathname.indexOf("favicon.ico") != -1) return;
       console.log((new Date().getTime())+" : " + pathname);
@@ -29,28 +28,27 @@ var Main = {
         try {
           var stats = fs.statSync(filePath);
         } catch (e) {
-          response.sendBlank();
+          res.sendBlank();
         }
         if (stats.isFile()) {
           fs.readFile(filePath,"utf-8", function(err, template) {
             if (err) {
-              self.writeBlank(response);
+              res.sendBlank();
             }
-            
             var json = {};
             try{
               json = JSON.parse(template);
-              json = Mock.mock( json );
+              json = Mock.mock(json);
             } catch(e){
-              response.sendBlank();
+              res.sendBlank();
             }
-            response.end(JSON.stringify(json, null, 4));
+            res.end(JSON.stringify(json, null, 4));
           });
         } else {
-          response.sendBlank();
+          res.sendBlank();
         }
       } else {
-        response.sendBlank();
+        res.sendBlank();
       }
     }).listen(conf.PORT);
   },
@@ -83,8 +81,3 @@ var Main = {
 
 };
 Main.start();
-
-// var server = http.createServer(function(request, response) {
-
-// })
-// server.listen(8096)

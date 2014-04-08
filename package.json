@@ -1,0 +1,19 @@
+{
+  "name": "mymock",
+  "version": "0.0.1",
+  "description": "mock data for local test",
+  "main": "index.js",
+  "dependencies": {
+        "mockjs": ">= 0.0.1"
+  },
+  "scripts": {
+    "test": "node listen.js"
+  },
+  "keywords": [
+    "mock",
+    "localtest",
+    "test"
+  ],
+  "author": "FHY(yuhongfei1001@163.com)",
+  "license": "ISC"
+}

@@ -25,6 +25,8 @@ var Main = {
         result = result.replace(/\//, '\\');
         var getewd = process.cwd()
         var filePath = getewd + path.sep + 'data' + path.sep + result;
+        //support ajax Cross domain
+        res.setHeader("Access-Control-Allow-Origin", "*");
         try {
           var stats = fs.statSync(filePath);
         } catch (e) {

@@ -21,19 +21,20 @@ var Main = {
       if (pathname.indexOf("favicon.ico") != -1) return;
       console.log((new Date().getTime())+" : " + pathname);
       var result = self.match(pathname);
-      if (result) {
-        result = result.replace(/\//, '\\');
+      if (result){
+        result = result.replace(/\//g, '\\');
         var getewd = process.cwd()
         var filePath = getewd + path.sep + 'data' + path.sep + result;
         //support ajax Cross domain
         res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Content-type","text/plain");
         try {
           var stats = fs.statSync(filePath);
         } catch (e) {
           res.sendBlank();
         }
-        if (stats.isFile()) {
-          fs.readFile(filePath,"utf-8", function(err, template) {
+        if (stats && stats.isFile()) {
+          fs.readFile(filePath, "utf-8", function(err, template) {
             if (err) {
               res.sendBlank();
             }
@@ -75,9 +76,7 @@ var Main = {
   bindEvent: function() {
     var self = this;
     fs.watch(CONFFILE, function() {
-      self.update();
-      console.log("config is update!!");
-      conf = require(CONFFILE);
+      console.log("config is update, please restart!");
     })
   }
 

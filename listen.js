@@ -19,15 +19,17 @@ var Main = {
       self.bindBlankForRes(res);
       var pathname = urlParse(request.url).pathname;
       if (pathname.indexOf("favicon.ico") != -1) return;
-      console.log((new Date().getTime())+" : " + pathname);
+      console.log((new Date().toString().match(/\d{1,2}:\d{1,2}:\d{1,2}/)[0])+" : " + pathname);
       var result = self.match(pathname);
       if (result){
         result = result.replace(/\//g, '\\');
         var getewd = process.cwd()
         var filePath = getewd + path.sep + 'data' + path.sep + result;
         //support ajax Cross domain
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Content-type","text/plain");
+        res.setHeader("Access-Control-Allow-Headers","Content-Type, Accept");
+        res.setHeader("Access-Control-Allow-Methods","GET, POST, PUT, DELETE");
+        res.setHeader("Access-Control-Allow-Origin","*");
+        res.setHeader("Access-Control-Max-Age",30 * 24 * 3600);
         try {
           var stats = fs.statSync(filePath);
         } catch (e) {

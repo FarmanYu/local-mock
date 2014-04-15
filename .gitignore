@@ -1,0 +1,7 @@
+#############
+## file
+#############
+.idea
+node_modules
+config.py
+__pycache__

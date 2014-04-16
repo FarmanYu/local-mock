@@ -41,7 +41,6 @@ var Main = {
   },
   match: function(pathname) {
     var paths = conf.paths;
-    console.log('tt',paths);
     var pathURL = path.normalize(pathname);
     var data = false;
     for (var item in paths) {

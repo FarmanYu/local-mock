@@ -20,7 +20,6 @@ var Main = {
           console.log((new Date().toString().match(/\d{1,2}:\d{1,2}:\d{1,2}/)[0])+" : " + pathname);
           var result = self.match(pathname);
           if(!result)self.errorHandler(res);
-          result = result.replace(/\//g, '\\');
           var getewd = process.cwd()
           var filePath = getewd + path.sep + result;
           try{

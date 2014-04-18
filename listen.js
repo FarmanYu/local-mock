@@ -1,7 +1,9 @@
 var http = require("http"),
     fs = require("fs"),
     urlParse = require("url"),
-    path = require("path");
+    path = require("path"),
+    network = require("./network"),
+    storge = require("./storge");
 try{
   var conf = require('./config'),Mock = require("mockjs"),self;
 }catch(e){
@@ -20,20 +22,55 @@ var Main = {
           console.log((new Date().toString().match(/\d{1,2}:\d{1,2}:\d{1,2}/)[0])+" : " + pathname);
           var result = self.match(pathname);
           if(!result)self.errorHandler(res);
-          var getewd = process.cwd()
-          var filePath = getewd + path.sep + result;
-          try{
-              var stats = fs.statSync(filePath);
-              if(!(stats && stats.isFile())){
-                  self.errorHandler(res);
-              }
-          }catch (e) {
-              self.errorHandler(res);
+          if(!/^http/.test(result)){
+            var getewd = process.cwd();
+            var filePath = getewd + path.sep + result;
+            try{
+                var stats = fs.statSync(filePath);
+                if(!(stats && stats.isFile())){
+                    self.errorHandler(res);
+                }
+            }catch (e) {
+                self.errorHandler(res);
+            }
+            self.staticFileService(filePath,res);
+          } else{
+            var body = "", name = "_" + result.replace(/\//g,"").replace(/\./g,"").replace(/\:/g,"");
+            if(storge.hasDataByName(name)){
+                console.log(">>>>>>>>>>>>>>data form local>>>>>>>>>>>>");
+                var data = JSON.parse(storge.getDataByName(name));
+                    data = Mock.mock(data);
+                self.resposeToClint(res, data);
+            } else{
+              request.addListener("data", function(chunk){
+                  body += chunk;
+              });
+              request.addListener("end", function() { 
+                  network.get({
+                   url : result,
+                   param : body,
+                   requestType : request.headers['Content-Type']
+                 }, function(json){                    
+                    storge.save(name, json);
+                    var data = JSON.parse(json);
+                    data = Mock.mock(data);
+                    self.resposeToClint(res, data);
+                  });
+              });
+            }
           }
-          self.staticFileService(filePath,res);
       }
     });
     return self.server;
+  },
+  resposeToClint : function(res, data){
+    res.writeHead('200',{
+      'Access-Control-Allow-Headers':'Content-Type, Accept',
+      'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE',
+      'Access-Control-Allow-Origin':'*',
+      'Access-Control-Max-Age':30 * 24 * 3600
+    });
+    res.end(JSON.stringify(data, null, 4));
   },
   errorHandler: function(res) {
       res.writeHead('404',{'Content-Type': 'text/html'});
@@ -64,13 +101,7 @@ var Main = {
         } catch(e){
           self.errorHandler(res);
         }
-        res.writeHead('200',{
-          'Access-Control-Allow-Headers':'Content-Type, Accept',
-          'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE',
-          'Access-Control-Allow-Origin':'*',
-          'Access-Control-Max-Age':30 * 24 * 3600
-        });
-        res.end(JSON.stringify(json, null, 4));
+        self.resposeToClint(res, json);
     });
   }
 };

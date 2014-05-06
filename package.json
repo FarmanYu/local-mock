@@ -2,7 +2,7 @@
   "name": "mymock",
   "version": "0.0.1",
   "description": "mock data for local test",
-  "main": "index.js",
+  "main": "./listen.js",
   "dependencies": {
         "mockjs": ">= 0.0.1"
   },
@@ -15,5 +15,5 @@
     "test"
   ],
   "author": "FHY(yuhongfei1001@163.com)",
-  "license": "ISC"
+  "license": "MIT"
 }

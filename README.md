@@ -9,3 +9,6 @@
 
 ##启动任务
 在config配置好路由规则，启动my mock(node listen.js)，可以访问本地对应接口里的路径测试
+
+##MIT
+MIT

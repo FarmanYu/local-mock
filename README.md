@@ -7,8 +7,14 @@
 * PORT为构建请求默认输出端口
 * paths为配置路径参数，不同路径对应不同数据文件
 
+##安装
+
+    npm install
+
 ##启动任务
-在config配置好路由规则，启动my mock(node listen.js)，可以访问本地对应接口里的路径测试
+在config配置好路由规则，启动local mock，可以访问本地对应接口里的路径测试
+    
+    node listen.js    
 
 ##MIT
 MIT

@@ -3,13 +3,10 @@ var http = require("http"),
     urlParse = require("url"),
     path = require("path"),
     network = require("./network"),
-    storge = require("./storge");
-try{
-  var conf = require('./config'),Mock = require("mockjs"),self;
-}catch(e){
-  console.log('not find module config or mock.js');
-  return false;
-}
+    conf = require('./config'),
+    Mock = require("mockjs"),
+    self;
+
 var Main = {
   server:null,
   start: function() {
@@ -19,9 +16,12 @@ var Main = {
     self.server = http.createServer(function(request,res){
       var pathname = urlParse.parse(request.url).pathname;
       if(pathname !== '/favicon.ico'){
-          console.log((new Date().toString().match(/\d{1,2}:\d{1,2}:\d{1,2}/)[0])+" : " + pathname);
+          self.log("Request " + pathname);
           var result = self.match(pathname);
-          if(!result)self.errorHandler(res);
+          if(!result){
+            self.errorHandler(res);
+            return;
+          }
           if(!/^http/.test(result)){
             var getewd = process.cwd();
             var filePath = getewd + path.sep + result;
@@ -29,41 +29,36 @@ var Main = {
                 var stats = fs.statSync(filePath);
                 if(!(stats && stats.isFile())){
                     self.errorHandler(res);
+                    return;
                 }
             }catch (e) {
                 self.errorHandler(res);
+                return;
             }
             self.staticFileService(filePath,res);
           } else{
             var body = "", name = "_" + result.replace(/\//g,"").replace(/\./g,"").replace(/\:/g,"");
-            if(storge.hasDataByName(name)){
-                console.log(">>>>>>>>>>>>>>data form local>>>>>>>>>>>>");
-                var data = JSON.parse(storge.getDataByName(name));
-                    data = Mock.mock(data);
-                self.resposeToClint(res, data);
-            } else{
-              request.addListener("data", function(chunk){
-                  body += chunk;
-              });
-              request.addListener("end", function() { 
-                  network.get({
-                   url : result,
-                   param : body,
-                   requestType : request.headers['Content-Type']
-                 }, function(json){                    
-                    storge.save(name, json);
-                    var data = JSON.parse(json);
-                    data = Mock.mock(data);
-                    self.resposeToClint(res, data);
-                  });
-              });
-            }
+            request.addListener("data", function(chunk){
+                body += chunk;
+            });
+            request.addListener("end", function() { 
+                network.get({
+                 url : result,
+                 param : body,
+                 requestType : request.headers['Content-Type']
+               }, function(json){                    
+                  var data = JSON.parse(json);
+                  data = Mock.mock(data);
+                  self.resposeToClient(res, data);
+                });
+            });
           }
       }
     });
     return self.server;
   },
-  resposeToClint : function(res, data){
+  resposeToClient : function(res, data){
+    self.log("Respose Status: 200");
     res.writeHead('200',{
       'Access-Control-Allow-Headers':'Content-Type, Accept',
       'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE',
@@ -73,8 +68,12 @@ var Main = {
     res.end(JSON.stringify(data, null, 4));
   },
   errorHandler: function(res) {
+      self.log("Respose status: 404");
       res.writeHead('404',{'Content-Type': 'text/html'});
       res.end("<h1>hi all this request is 404 or handler is bad</h1>");
+  },
+  log: function(log){
+    console.log((new Date().toString().match(/\d{1,2}:\d{1,2}:\d{1,2}/)[0])+" : " + log);
   },
   match: function(pathname) {
     var paths = conf.paths;
@@ -101,7 +100,7 @@ var Main = {
         } catch(e){
           self.errorHandler(res);
         }
-        self.resposeToClint(res, json);
+        self.resposeToClient(res, json);
     });
   }
 };

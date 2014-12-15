@@ -17,6 +17,10 @@ var Main = {
       var pathname = urlParse.parse(request.url).pathname;
       if(pathname !== '/favicon.ico'){
           self.log("Request " + pathname);
+		  if(pathname == '/'){
+		  	self.resposeToClient(res, conf.paths);
+			return;
+		  }
           var result = self.match(pathname);
           if(!result){
             self.errorHandler(res);
